@@ -13,13 +13,12 @@ var nodes = new vis.DataSet([
 
 // create an array with edges
 var edges = new vis.DataSet([
-    { from: 1, to: 3, arrows: "to" },
-    { from: 1, to: 2, arrows: "to" },
-    { from: 2, to: 4, arrows: "to" },
-    { from: 2, to: 5, arrows: "to" },
-    { from: 3, to: 3, arrows: "to" },
+    { label: "a1", from: 1, to: 3, arrows: "to" },
+    { label: "a2", from: 1, to: 2, arrows: "to" },
+    { label: "a3", from: 2, to: 4, arrows: "to" },
+    { label: "a4", from: 2, to: 5, arrows: "to" },
+    { label: "a5", from: 3, to: 3, arrows: "to" },
 ]);
-console.log(edges)
 
 // create a network
 var container = document.getElementById("mynetwork");
@@ -60,7 +59,6 @@ function draw() {
                 editNode(data, cancelNodeEdit, callback);
             },
             addEdge: function (data, callback) {
-                console.log(data)
                 if (data.from == data.to) {
                     var r = confirm("Do you want to connect the node to itself?");
                     if (r != true) {
@@ -83,7 +81,6 @@ function draw() {
 }
 
 function editNode(data, cancelAction, callback) {
-    console.log(data);
     document.getElementById("node-label").value = data.label;
     document.getElementById("node-saveButton").onclick = saveNodeData.bind(this, data, callback);
     document.getElementById("node-cancelButton").onclick = cancelAction.bind(this, callback);
@@ -109,7 +106,6 @@ function saveNodeData(data, callback) {
 }
 
 function editEdgeWithoutDrag(data, callback) {
-    console.log(data)
     // filling in the popup DOM elements
     document.getElementById("edge-label").value = data.label;
     document.getElementById("edge-saveButton").onclick = saveEdgeData.bind(this, data, callback);
@@ -158,16 +154,60 @@ function addConnections(edges){
 function exportNetwork() {
     // clearOutputArea();
 
-    var nodes = objectToArray(network.getPositions());
+    // Find useful information for nodes
+    var nodeIds = network.body.nodeIndices;
+    var nodeDict = network.body.nodes;
+    var nodes = nodeIds.map(function(id){
+        nodeDict[id] = {id: id, label: getLabel(nodeDict[id])};
+        return nodeDict[id];
+    });
 
-    var edges = [];
-    nodes.forEach(addConnections(edges));
-    edges = [].concat.apply([],edges);
-    return [nodes, edges];
-    // pretty print node data
-    // var exportValue = JSON.stringify(nodes, undefined, 2);
+    // Find useful information for edges
+    var edgeIds = network.body.edgeIndices;
+    var edgeDict = network.body.edges;
+    var edges = edgeIds.map(function(id){
+        var elem = edgeDict[id];
+        return {id: id, to: elem.toId, from: elem.fromId, label: getLabel(elem)};
+    });
 
-    // return exportValue
+    return [nodes, edges, nodeDict];
+}
+
+function networkToQuiver(nodes, edges, nodeDict){
+    function objName(obj){
+        if (obj.label == ""){
+            return obj.id
+        } else {
+            return obj.label
+        };
+    }
+    var nodeString = nodes.map(objName);
+    nodeString = '["' + nodeString.join('", "') + '"]'
+
+    var edgeString = edges.map(function(edge){
+        var from = objName(nodeDict[edge.from]);
+        var to = objName(nodeDict[edge.to]);
+        var edgeName = objName(edge);
+        return '["' + [from,to,edgeName].join('", "') + '"]'
+    });
+    edgeString = '[' + edgeString.join(', ') + ']';
+
+    return "Quiver( " + nodeString + ", " + edgeString + " );"
+}
+
+function exportToString(){
+    var n = exportNetwork();
+    return networkToQuiver(n[0], n[1], n[2]);
+}
+
+function getLabel(elem) {
+    var label;
+    try {
+        label = elem.labelModule.lines[0].blocks[0].text;
+    } catch {
+        label = "";
+    }
+    return label;
 }
 
 function objectToArray(obj) {
