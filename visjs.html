@@ -6,12 +6,13 @@
       type="text/javascript"
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
-		<style type="text/css">
+    <style type="text/css">
       body,
       select {
         font: 10pt sans;
       }
       #mynetwork {
+        float: left;
         position: relative;
         width: 800px;
         height: 600px;
@@ -77,10 +78,10 @@
 		<div id="node-popUp">
 			<span id="node-operation">node</span> <br>
 			<table style="margin: auto">
-				<tbody><tr>
-					<td>id</td>
-					<td><input id="node-id" value="new value"></td>
-				</tr>
+				<!-- <tbody><tr> -->
+				<!-- 	<td>id</td> -->
+				<!-- 	<td><input id="node-id" value="new value"></td> -->
+				<!-- </tr> -->
 				<tr>
 					<td>label</td>
 					<td><input id="node-label" value="new value"></td>
@@ -101,6 +102,29 @@
       <input type="button" value="cancel" id="edge-cancelButton">
     </div>
     <div id="mynetwork"></div>
+    <div>
+      <textarea id="input_output"></textarea>
+      <!-- <input -->
+      <!--   type="button" -->
+      <!--   id="import_button" -->
+      <!--   onclick="importNetwork()" -->
+      <!--   value="import" -->
+      <!-- /> -->
+      <input
+        type="button"
+        id="export_button"
+        onclick="exportToTextBox()"
+        value="export"
+      />
+      <!--
+      <input
+        type="button"
+        id="destroy_button"
+        onclick="destroyNetwork()"
+        value="destroy"
+      />
+      -->
+    </div>
     <script type="text/javascript" src="visjs.js">
     </script>
   </body>

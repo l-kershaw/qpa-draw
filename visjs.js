@@ -2,22 +2,23 @@ var seed = 7;
 var nodes = null;
 var edges = null;
 var network = null;
-// randomly create some nodes and edges
+
+// create an array with nodes
 var nodes = new vis.DataSet([
-    { id: 1, label: "1" },
-    { id: 2, label: "2" },
-    { id: 3, label: "3" },
-    { id: 4, label: "4" },
-    { id: 5, label: "5" },
+    { id: "1", label: "1" },
+    { id: "2", label: "2" },
+    { id: "3", label: "3" },
+    { id: "4", label: "4" },
+    { id: "5", label: "5" },
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
-    { label: "a1", from: 1, to: 3, arrows: "to" },
-    { label: "a2", from: 1, to: 2, arrows: "to" },
-    { label: "a3", from: 2, to: 4, arrows: "to" },
-    { label: "a4", from: 2, to: 5, arrows: "to" },
-    { label: "a5", from: 3, to: 3, arrows: "to" },
+    {  label: "a1", from: 1, to: 3, arrows: "to" },
+    {  label: "a2", from: 1, to: 2, arrows: "to" },
+    {  label: "a3", from: 2, to: 4, arrows: "to" },
+    {  label: "a4", from: 2, to: 5, arrows: "to" },
+    {  label: "a5", from: 3, to: 3, arrows: "to" },
 ]);
 
 // create a network
@@ -30,7 +31,15 @@ var data = {
 };
 var options = {};
 
-function destroy() {
+var exportArea;
+
+function init() {
+    exportArea = document.getElementById("input_output");
+
+    draw();
+}
+
+function destroyNetwork() {
     if (network !== null) {
         network.destroy();
         network = null;
@@ -38,7 +47,7 @@ function destroy() {
 }
 
 function draw() {
-    destroy();
+    destroyNetwork();
     nodes = [];
     edges = [];
 
@@ -51,12 +60,12 @@ function draw() {
             addNode: function (data, callback) {
                 // filling in the popup DOM elements
                 document.getElementById("node-operation").innerText = "Add Node";
-                editNode(data, clearNodePopUp, callback);
+                editNode(data, clearNodePopUp, callback, true);
             },
             editNode: function (data, callback) {
                 // filling in the popup DOM elements
                 document.getElementById("node-operation").innerText = "Edit Node";
-                editNode(data, cancelNodeEdit, callback);
+                editNode(data, cancelNodeEdit, callback, false);
             },
             addEdge: function (data, callback) {
                 if (data.from == data.to) {
@@ -80,9 +89,9 @@ function draw() {
     network = new vis.Network(container, data, options);
 }
 
-function editNode(data, cancelAction, callback) {
+function editNode(data, cancelAction, callback, newNode) {
     document.getElementById("node-label").value = data.label;
-    document.getElementById("node-saveButton").onclick = saveNodeData.bind(this, data, callback);
+    document.getElementById("node-saveButton").onclick = saveNodeData.bind(this, data, callback, newNode);
     document.getElementById("node-cancelButton").onclick = cancelAction.bind(this, callback);
     document.getElementById("node-popUp").style.display = "block";
 }
@@ -99,10 +108,14 @@ function cancelNodeEdit(callback) {
     callback(null);
 }
 
-function saveNodeData(data, callback) {
+function saveNodeData(data, callback, newNode) {
     data.label = document.getElementById("node-label").value;
-    clearNodePopUp();
-    callback(data);
+    if (newNode && network.body.nodeIndices.includes(data.id)) {
+        alert("The id " + data.id + " is already in use.");
+    } else {
+        clearNodePopUp();
+        callback(data);
+    };
 }
 
 function editEdgeWithoutDrag(data, callback) {
@@ -129,14 +142,14 @@ function saveEdgeData(data, callback) {
     if (typeof data.from === "object") data.from = data.from.id;
     data.label = document.getElementById("edge-label").value;
     data.arrows = "to";
-    clearEdgePopUp();
-    callback(data);
+    if (network.body.edgeIndices.includes(data.id)) {
+        alert("The id " + data.id + " is already in use.");
+    } else {
+        clearEdgePopUp();
+        callback(data);
+    };
 }
 
-function init() {
-    // setDefaultLocale();
-    draw();
-}
 
 function addConnections(edges){
     return function(elem) {
@@ -156,9 +169,10 @@ function exportNetwork() {
 
     // Find useful information for nodes
     var nodeIds = network.body.nodeIndices;
-    var nodeDict = network.body.nodes;
+    var nodeInfo = network.body.nodes;
+    var nodeDict = {}
     var nodes = nodeIds.map(function(id){
-        nodeDict[id] = {id: id, label: getLabel(nodeDict[id])};
+        nodeDict[id] = {id: id, label: getLabel(nodeInfo[id])};
         return nodeDict[id];
     });
 
@@ -195,9 +209,12 @@ function networkToQuiver(nodes, edges, nodeDict){
     return "Quiver( " + nodeString + ", " + edgeString + " );"
 }
 
-function exportToString(){
+function exportToTextBox(){
     var n = exportNetwork();
-    return networkToQuiver(n[0], n[1], n[2]);
+    var val = networkToQuiver(n[0], n[1], n[2]);
+    exportArea.value = val
+    resizeExportArea()
+    return val
 }
 
 function getLabel(elem) {
@@ -215,6 +232,10 @@ function objectToArray(obj) {
         obj[key].id = key;
         return obj[key];
     });
+}
+
+function resizeExportArea() {
+    exportArea.style.height = 1 + exportArea.scrollHeight + "px";
 }
 
 // function deduplicateByID(array) {
