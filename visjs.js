@@ -76,12 +76,12 @@ function draw() {
                     }
                 }
                 document.getElementById("edge-operation").innerText = "Add Edge";
-                editEdgeWithoutDrag(data, callback);
+                editEdgeWithoutDrag(data, callback, true);
             },
             editEdge: {
                 editWithoutDrag: function (data, callback) {
                     document.getElementById("edge-operation").innerText = "Edit Edge";
-                    editEdgeWithoutDrag(data, callback);
+                    editEdgeWithoutDrag(data, callback, false);
                 },
             },
         },
@@ -118,10 +118,10 @@ function saveNodeData(data, callback, newNode) {
     };
 }
 
-function editEdgeWithoutDrag(data, callback) {
+function editEdgeWithoutDrag(data, callback, newEdge) {
     // filling in the popup DOM elements
     document.getElementById("edge-label").value = data.label;
-    document.getElementById("edge-saveButton").onclick = saveEdgeData.bind(this, data, callback);
+    document.getElementById("edge-saveButton").onclick = saveEdgeData.bind(this, data, callback, newEdge);
     document.getElementById("edge-cancelButton").onclick = cancelEdgeEdit.bind(this, callback);
     document.getElementById("edge-popUp").style.display = "block";
 }
@@ -137,12 +137,12 @@ function cancelEdgeEdit(callback) {
     callback(null);
 }
 
-function saveEdgeData(data, callback) {
+function saveEdgeData(data, callback, newEdge) {
     if (typeof data.to === "object") data.to = data.to.id;
     if (typeof data.from === "object") data.from = data.from.id;
     data.label = document.getElementById("edge-label").value;
     data.arrows = "to";
-    if (network.body.edgeIndices.includes(data.id)) {
+    if (newEdge && network.body.edgeIndices.includes(data.id)) {
         alert("The id " + data.id + " is already in use.");
     } else {
         clearEdgePopUp();
@@ -195,6 +195,16 @@ function networkToQuiver(nodes, edges, nodeDict){
             return obj.label
         };
     }
+
+    var nodeNames = nodes.map(e => e.label)
+    if (nodeNames.length != Array.from(new Set(nodeNames)).length) {
+        return "Duplicate node names"
+    }
+    var edgeNames = edges.map(e => e.label)
+    if (edgeNames.length != Array.from(new Set(edgeNames)).length) {
+        return "Duplicate edge names"
+    }
+
     var nodeString = nodes.map(objName);
     nodeString = '["' + nodeString.join('", "') + '"]'
 
