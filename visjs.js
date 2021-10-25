@@ -223,7 +223,7 @@ function exportToTextBox(){
     var n = exportNetwork();
     var val = networkToQuiver(n[0], n[1], n[2]);
     exportArea.value = val
-    resizeExportArea()
+    // resizeExportArea()
     return val
 }
 
@@ -245,16 +245,41 @@ function objectToArray(obj) {
 }
 
 function resizeExportArea() {
-    exportArea.style.height = 1 + exportArea.scrollHeight + "px";
+    exportArea.style.height = exportArea.scrollHeight + "px";
 }
 
-// function deduplicateByID(array) {
-//     var ids = [];
-//     var newArray = [];
-//     array.forEach( function(elem){
-//        if ids.indexOf // hjdshjdsajhadsk
-//     });
-// }
+function importNetwork() {
+    var val = exportArea.value
+
+    // Remove unnecessary prefix and suffixes
+    val = val.split("(")[1]
+    val = val.split(")")
+    val = val.slice(0, val.length - 1)
+    val = val.join(")").trim()
+
+    // Parse through JSON
+    val = JSON.parse("[".concat(val,"]"))
+
+    var nodes = val[0]
+    var edges = val[1]
+
+    nodes = nodes.map(function(n){return {id: n, label: n}});
+    edges = edges.map(function(e){return {from: e[0], to: e[1], label: e[2], arrows: "to"}})
+
+    nodes = new vis.DataSet(nodes)
+    edges = new vis.DataSet(edges)
+
+    data = {
+        nodes: nodes,
+        edges: edges
+    }
+
+    draw()
+
+    return nodes, edges
+}
+
+var builtin = {}
 
 init();
 
