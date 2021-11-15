@@ -5,20 +5,20 @@ var network = null;
 
 // create an array with nodes
 var nodes = new vis.DataSet([
-    { id: "1", label: "1" },
-    { id: "2", label: "2" },
-    { id: "3", label: "3" },
-    { id: "4", label: "4" },
-    { id: "5", label: "5" },
+    { id: "v1", label: "v1" },
+    { id: "v2", label: "v2" },
+    { id: "v3", label: "v3" },
+    { id: "v4", label: "v4" },
+    { id: "v5", label: "v5" },
 ]);
 
 // create an array with edges
 var edges = new vis.DataSet([
-    {  label: "a1", from: 1, to: 3, arrows: "to" },
-    {  label: "a2", from: 1, to: 2, arrows: "to" },
-    {  label: "a3", from: 2, to: 4, arrows: "to" },
-    {  label: "a4", from: 2, to: 5, arrows: "to" },
-    {  label: "a5", from: 3, to: 3, arrows: "to" },
+    {  label: "a1", from: "v1", to: "v3", arrows: "to" },
+    {  label: "a2", from: "v1", to: "v2", arrows: "to" },
+    {  label: "a3", from: "v2", to: "v4", arrows: "to" },
+    {  label: "a4", from: "v2", to: "v5", arrows: "to" },
+    {  label: "a5", from: "v3", to: "v3", arrows: "to" },
 ]);
 
 // create a network
