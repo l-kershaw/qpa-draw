@@ -123,12 +123,20 @@ function editEdgeWithoutDrag(data, callback, newEdge) {
     document.getElementById("edge-label").value = data.label;
     document.getElementById("edge-saveButton").onclick = saveEdgeData.bind(this, data, callback, newEdge);
     document.getElementById("edge-cancelButton").onclick = cancelEdgeEdit.bind(this, callback);
+    if (!newEdge) {
+        document.getElementById("edge-reverseButton").onclick = reverseEdgeData.bind(this, data, callback);
+        document.getElementById("edge-reverseButton").style.display = "block";
+    } else {
+        document.getElementById("edge-reverseButton").onclick = null;
+        document.getElementById("edge-reverseButton").style.display = "none";
+    }
     document.getElementById("edge-popUp").style.display = "block";
 }
 
 function clearEdgePopUp() {
     document.getElementById("edge-saveButton").onclick = null;
     document.getElementById("edge-cancelButton").onclick = null;
+    document.getElementById("edge-reverseButton").onclick = null;
     document.getElementById("edge-popUp").style.display = "none";
 }
 
@@ -148,6 +156,14 @@ function saveEdgeData(data, callback, newEdge) {
         clearEdgePopUp();
         callback(data);
     };
+}
+
+function reverseEdgeData(data, callback) {
+    var temp = data.from
+    data.from = data.to
+    data.to = temp
+    clearEdgePopUp();
+    callback(data);
 }
 
 
@@ -245,7 +261,7 @@ function objectToArray(obj) {
 }
 
 function resizeExportArea() {
-    exportArea.style.height = exportArea.scrollHeight + "px";
+    exportArea.style.height = (exportArea.scrollHeight - 1) + "px";
 }
 
 function importNetwork() {
